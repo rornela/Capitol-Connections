@@ -7,14 +7,16 @@ import streamlit as st
 import pandas as pd
 from pathlib import Path
 import altair as alt
+from cache import refresh_cache, CACHE_PATH as CACHE_FILE
 
-CACHE_PATH: Path = Path(__file__).parent / "data" / "trades_enriched.parquet"
 
 
 @st.cache_data
 def load_data() -> pd.DataFrame:
-    """Load the cached Parquet file into memory. Cached across reruns."""
-    return pd.read_parquet(CACHE_PATH)
+    """Load cached data, rebuilding from Airtable if cache is missing."""
+    if not CACHE_FILE.exists():
+        refresh_cache()
+    return pd.read_parquet(CACHE_FILE)
 
 
 # --- Page config (must be the first Streamlit command) ---
