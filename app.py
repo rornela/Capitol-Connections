@@ -109,7 +109,13 @@ chart: alt.Chart = (
         ),
         tooltip=["Full Name", "Party", "Trades"],
     )
-    .properties(height=400)
+    .properties(
+        height=400,
+        description=(
+            f"Horizontal bar chart showing the top {top_n} most active "
+            "senators by trade count, colored by political party."
+        ),
+    )
 )
 
 st.altair_chart(chart, use_container_width=True)
@@ -127,7 +133,24 @@ monthly: pd.DataFrame = (
     .rename(columns={"trade_date": "Month"})
 )
 
-st.line_chart(monthly, x="Month", y="Trades")
+timeline: alt.Chart = (
+    alt.Chart(monthly)
+    .mark_line(point=True)
+    .encode(
+        x=alt.X("Month:T"),
+        y=alt.Y("Trades:Q"),
+        tooltip=["Month:T", "Trades:Q"],
+    )
+    .properties(
+        height=350,
+        description=(
+            "Line chart showing monthly U.S. Senate stock trading "
+            "activity from 2012 to 2020."
+        ),
+    )
+)
+
+st.altair_chart(timeline, use_container_width=True)
 
 st.divider()
 # --- Senator Deep Dive ---
