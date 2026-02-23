@@ -66,10 +66,13 @@ col3.metric(
     "Unique Assets",
     f"{filtered['ticker'].dropna().nunique():,}",
 )
-col4.metric(
-    "Date Range",
-    f"{filtered['trade_date'].min():%b %Y} — {filtered['trade_date'].max():%b %Y}",
-)
+if filtered.empty:
+    col4.metric("Date Range", "N/A")
+else:
+    col4.metric(
+        "Date Range",
+        f"{filtered['trade_date'].min():%b %Y} — {filtered['trade_date'].max():%b %Y}",
+    )
 
 st.divider()
 # --- Top Traders ---
