@@ -4,7 +4,7 @@ An end-to-end ETL pipeline and interactive dashboard tracking U.S. Senate stock 
 
 **[Live Dashboard →](https://capitol-connections.streamlit.app)**
 
-![Capitol Connections Dashboard](assets/Dash-Screenshot.png)
+![Capitol Connections Dashboard](Assets/Dash-Screenshot.png)
 
 ---
 
@@ -46,14 +46,14 @@ Senate Stock Watcher (GitHub)          @unitedstates/congress-legislators
 
 ## Tech Stack
 
-| Layer | Technology | Purpose |
-|-------|-----------|---------|
-| Extraction | Python `requests` | Fetch raw transaction JSON from GitHub |
-| Transformation | Pandas | Clean, deduplicate, normalize, type coerce |
-| Storage | Airtable | Relational backend with linked tables |
-| Enrichment | `@unitedstates` project | Legislator metadata (party, state) |
-| Caching | Apache Parquet | Denormalized flat file for fast dashboard reads |
-| Frontend | Streamlit + Altair | Interactive visualization and filtering |
+| Layer          | Technology              | Purpose                                         |
+| -------------- | ----------------------- | ----------------------------------------------- |
+| Extraction     | Python `requests`       | Fetch raw transaction JSON from GitHub          |
+| Transformation | Pandas                  | Clean, deduplicate, normalize, type coerce      |
+| Storage        | Airtable                | Relational backend with linked tables           |
+| Enrichment     | `@unitedstates` project | Legislator metadata (party, state)              |
+| Caching        | Apache Parquet          | Denormalized flat file for fast dashboard reads |
+| Frontend       | Streamlit + Altair      | Interactive visualization and filtering         |
 
 ---
 
@@ -91,9 +91,11 @@ This structure eliminates update anomalies — updating a senator's party happen
 ## Data Pipeline Details
 
 ### Extract
+
 Fetches raw Senate STOCK Act disclosure data from the [Senate Stock Watcher](https://github.com/timothycarambat/senate-stock-watcher-data) open-source dataset (8,350 raw records).
 
 ### Transform
+
 - Replaces sentinel values (`"--"`, `"N/A"`, `""`) with proper nulls
 - Renames columns to match the Airtable schema
 - Drops records with null trade types (463 records)
@@ -101,17 +103,20 @@ Fetches raw Senate STOCK Act disclosure data from the [Senate Stock Watcher](htt
 - Deduplicates politicians (51 unique) and assets (1,007 unique)
 
 ### Load
+
 - Batches Airtable writes at 10 records per request with rate limiting (~4.5 req/sec)
 - Loads parent tables (Politicians, Assets) first, then links child records (Trades) via Airtable record IDs
 - Handles pagination for all read operations (100 records/page with offset tokens)
 
 ### Enrich
+
 - Fetches current and historical legislator data from the [@unitedstates/congress-legislators](https://github.com/unitedstates/congress-legislators) project
 - Builds a fuzzy name-matching lookup with multiple name variations per legislator
 - Handles edge cases (legal names vs. common names) via a manual override map
 - PATCHes Airtable records additively — only fills empty fields, never overwrites
 
 ### Cache
+
 - Denormalizes all three Airtable tables back into a single flat DataFrame
 - Resolves linked record IDs into human-readable values
 - Saves as Parquet for type-safe, fast reads
@@ -122,6 +127,7 @@ Fetches raw Senate STOCK Act disclosure data from the [Senate Stock Watcher](htt
 ## Getting Started
 
 ### Prerequisites
+
 - Python 3.11+
 - An [Airtable](https://airtable.com) account with a Personal Access Token
 
